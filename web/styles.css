@@ -140,7 +140,8 @@ input[type='number'], input[type='text'], input[type='email'] {
 input:hover { border-color: var(--grey); }
 input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-tint); }
 input[aria-invalid='true'] { border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-tint); }
-input[type='checkbox'], input[type='radio'] { accent-color: var(--blue); width: 16px; height: 16px; }
+input[type='checkbox'], input[type='radio'] { accent-color: var(--blue); width: 20px; height: 20px; margin: 0; flex: none; }
+.inputs label.check, .buyer label { min-height: 44px; cursor: pointer; }
 .inputs label.check { flex-direction: row; align-items: center; gap: 10px; margin-bottom: 20px; color: var(--ink); }
 
 .bucket-table { overflow-x: auto; margin-bottom: 20px; }
@@ -159,7 +160,13 @@ button:hover { border-color: var(--ink); }
 .form-error { color: var(--orange-ink); background: var(--orange-tint); border-radius: 10px; padding: 10px 14px; font-weight: 500; }
 
 /* results */
-.results { position: sticky; top: 20px; align-self: start; }
+.results {
+  position: sticky; top: 20px; align-self: start;
+  max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px);
+  overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable;
+  border-radius: var(--radius);
+}
+.results .panel:last-child { margin-bottom: 0; }
 .panel {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 28px; margin-bottom: 20px;
@@ -224,19 +231,63 @@ button:hover { border-color: var(--ink); }
 
 @media (max-width: 1024px) {
   .workspace { grid-template-columns: minmax(0, 1fr); }
-  .results { position: static; }
+  .results { position: static; max-height: none; overflow: visible; }
 }
 
 @media (max-width: 600px) {
   .inputs, .panel { padding: 20px; }
   .grid, .lead-form { grid-template-columns: 1fr; }
   .diagnostics div { grid-template-columns: 1fr; gap: 4px; }
-  .pnl th, .pnl td { padding: 10px 4px; font-size: 14px; }
-  .pnl td { white-space: normal; }
-  .results { overflow-x: auto; }
   .tick:nth-child(2n) { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .demand, input, button { transition: none; }
 }
+
+/* Narrow screens: tables stack into labelled rows, so nothing scrolls sideways */
+@media (max-width: 640px) {
+  .pnl thead, .bucket-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .pnl, .pnl tbody, .pnl tr { display: block; width: 100%; }
+  .pnl tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .pnl tr.total { border-bottom: 0; }
+  .pnl th, .pnl td { display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    border: 0; padding: 3px 0; text-align: right; white-space: nowrap; }
+  .pnl th[scope='row'] { display: block; text-align: left; color: var(--ink); font-weight: 500; padding-bottom: 6px; }
+  .pnl tr.total th, .pnl tr.total td { font-size: 17px; padding-top: 3px; }
+  .pnl td::before { content: attr(data-label); color: var(--grey); font-size: 13px; font-weight: 400; text-align: left; white-space: normal; flex: 1 1 auto; min-width: 0; }
+  .pnl td.empty { display: none; }
+  .pnl .flag { display: inline; margin-left: 6px; }
+
+  .bucket-table { overflow: visible; }
+  .bucket-table table, .bucket-table tbody { display: block; min-width: 0; }
+  .bucket-table tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 8px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .bucket-table tbody th { grid-column: 1 / -1; max-width: none; padding: 0; color: var(--ink); }
+  .bucket-table td { display: flex; flex-direction: column; gap: 4px; padding: 0; }
+  .bucket-table td::before { content: attr(data-label); font-size: 12px; color: var(--grey); }
+  .bucket-table input { padding: 9px 8px; }
+
+  .ratio th, .ratio td { display: block; width: auto; padding: 4px 0; border: 0; }
+  .ratio tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .ratio tr:last-child { border-bottom: 0; }
+
+  .input-actions button { flex: 1 1 140px; }
+  .lead-form button { justify-self: stretch; }
+}
+
+/* Very narrow phones (320px): tighten the outer gutters a little */
+@media (max-width: 360px) {
+  main, .masthead, .footer { padding: 0 14px; }
+  .inputs, .panel { padding: 16px; }
+  .capture { padding: 24px 18px; }
+  .bucket-table tr { gap: 6px; }
+}
+
+/* Large screens: keep line lengths readable and give the two columns room */
+@media (min-width: 1800px) {
+  main, .masthead, .footer { max-width: 1440px; }
+}
+
+/* Keep a figure and its sign together in running text */
+.pnl-headline strong, .hero-readout strong, .diagnostics dd { overflow-wrap: anywhere; }
+.pnl-headline strong, .hero-readout strong { white-space: nowrap; }

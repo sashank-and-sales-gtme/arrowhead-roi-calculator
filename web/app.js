@@ -54,7 +54,7 @@ function renderBucketTable() {
       const name = `book.buckets.${i}.${f.key}`;
       const attrs = f.pct ? 'data-pct min="0" max="100" step="0.1"' : `min="0" step="${f.step}"`;
       const nullable = f.nullable ? 'data-nullable' : '';
-      return `<td><input type="number" name="${name}" ${attrs} ${nullable} aria-label="${f.label}, ${b.label}"></td>`;
+      return `<td data-label="${b.label}"><input type="number" name="${name}" ${attrs} ${nullable} aria-label="${f.label}, ${b.label}"></td>`;
     }).join('');
     return `<tr><th scope="row">${f.label}</th>${cells}</tr>`;
   }).join('');
@@ -148,6 +148,7 @@ function renderPnl(r) {
     row('Credit cost avoided', ['', signedInr(a.creditCostAvoided), signedInr(e.creditCostAvoided)]),
     row('P&amp;L impact per month', ['', signedInr(a.pnlImpact), signedInr(e.pnlImpact)], 'total'),
   ].join('');
+  labelCells(document.getElementById('pnl'));
 
   const headline = document.getElementById('pnl-headline');
   if (a.pnlImpact === null) {
@@ -155,6 +156,19 @@ function renderPnl(r) {
   } else {
     headline.innerHTML = `With Arrowhead running calls on its own, your monthly P&amp;L moves by <strong class="${a.pnlImpact < 0 ? 'loss' : ''}">${signedInr(a.pnlImpact)}</strong>. With escalation to your agents, by <strong class="${e.pnlImpact < 0 ? 'loss' : ''}">${signedInr(e.pnlImpact)}</strong>.`;
   }
+}
+
+/** Copies each column header onto its cells, so narrow screens can stack rows with labels. */
+function labelCells(table) {
+  const heads = [...table.querySelectorAll('thead th')].map((th) => th.textContent.trim());
+  table.querySelectorAll('tbody tr').forEach((tr) => {
+    [...tr.children].forEach((cell, i) => {
+      if (cell.tagName === 'TD') {
+        cell.dataset.label = heads[i] || '';
+        if (!cell.textContent.trim()) cell.classList.add('empty');
+      }
+    });
+  });
 }
 
 function renderVendor(r) {
@@ -178,6 +192,7 @@ function renderVendor(r) {
 
   if (v.status !== 'derived') {
     tbody.innerHTML = row('Collection cost', [inr(v.beforeCost), inr(v.afterCost), signedInr(v.afterCost - v.beforeCost)]);
+    labelCells(table);
     headline.textContent = v.status === 'no-vendor-rate'
       ? 'Add your vendor’s collection rate in each bucket to see what it collects against Arrowhead.'
       : 'Add your human collection rate in each bucket, from today or from before you moved to AI, to see what Arrowhead would collect on these accounts.';
@@ -192,6 +207,7 @@ function renderVendor(r) {
   ].join('');
   const hang = v.vendorHangups > 0
     ? ` Your vendor also loses ${count(v.vendorHangups)} connected calls a month in the first 10 seconds.` : '';
+  labelCells(table);
   headline.innerHTML = `Moving these accounts from your vendor to Arrowhead collects <strong>${inr(v.addedCollections)}</strong> more and moves your monthly P&amp;L by <strong class="${v.pnlImpact < 0 ? 'loss' : ''}">${signedInr(v.pnlImpact)}</strong>.${hang}`;
 }
 
