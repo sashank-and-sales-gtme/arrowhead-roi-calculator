@@ -80,12 +80,10 @@
         <fieldset>
           <legend>Arrowhead</legend>
           <div class="grid">
-            <label><span>Collection rate vs human agents (+%)<span class="tag">Published result</span></span><input type="number" name="arrowhead.collectionLift" data-pct min="-100" step="1">
-              <span class="hint">Measured on AI-only motions.</span></label>
-            <label><span>Connection rate vs human agents (+%)<span class="tag">Published result</span></span><input type="number" name="arrowhead.connectionLift" data-pct min="0" step="1">
-              <span class="hint">Explains the outcome, never adds rupees.</span></label>
-            <label><span>Price per connected minute, all-in (₹)<span class="tag">Arrowhead pricing</span></span><input type="number" name="arrowhead.ratePerMinute" min="0" step="0.05">
-              <span class="hint">₹3.50 to ₹4.00 including telephony.</span></label>
+          </div>
+          <dl class="fixed" id="fixed-figures"></dl>
+          <p class="section-hint hint">How you would run Arrowhead. Change these to match your operation.</p>
+          <div class="grid">
             <label>Average talk time (min)<input type="number" name="arrowhead.talkMinutes" min="0" step="0.1"></label>
             <label>Calls escalated to your agents (%)<input type="number" name="arrowhead.escalationRate" data-pct min="0" max="100" step="1"></label>
             <label>Borrowers lost during transfer (%)<input type="number" name="arrowhead.transferDropoff" data-pct min="0" max="100" step="1"></label>

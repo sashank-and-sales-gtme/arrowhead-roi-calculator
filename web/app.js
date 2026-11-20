@@ -340,7 +340,7 @@ document.getElementById('clear-all').addEventListener('click', () => {
     ...blank.arrowhead,
     collectionLift: ARROWHEAD_BENCHMARKS.collectionLift.value,
     connectionLift: ARROWHEAD_BENCHMARKS.connectionLift.value,
-    ratePerMinute: ARROWHEAD_RATE_RANGE.default,
+    ratePerMinute: ARROWHEAD_RATE_RANGE.applied,
   };
   state = blank;
   document.getElementById('demo-note').textContent = 'Enter your numbers. Arrowhead’s published figures are filled in for you.';
@@ -386,6 +386,20 @@ document.getElementById('lead-form').addEventListener('submit', async (ev) => {
   }
 });
 
+/** Arrowhead's published figures and price are shown as facts, not inputs. */
+function renderFixedFigures() {
+  const fmt = (x) => `₹${x.toFixed(2)}`;
+  const items = [
+    ['Collection rate vs human agents', `+${pct(ARROWHEAD_BENCHMARKS.collectionLift.value)}`, 'Published result', 'Measured on AI-only motions.'],
+    ['Connection rate vs human agents', `+${pct(ARROWHEAD_BENCHMARKS.connectionLift.value)}`, 'Published result', 'Explains the outcome, never adds rupees.'],
+    ['Price per connected minute, all-in', fmt(ARROWHEAD_RATE_RANGE.applied), 'Arrowhead pricing',
+      `Top of the ${fmt(ARROWHEAD_RATE_RANGE.min)} to ${fmt(ARROWHEAD_RATE_RANGE.max)} range, telephony included, so savings hold at the highest price.`],
+  ];
+  document.getElementById('fixed-figures').innerHTML = items.map(([label, value, tag, note]) =>
+    `<div><dt>${label}<span class="tag">${tag}</span></dt><dd><span class="fixed-value">${value}</span><span class="hint">${note}</span></dd></div>`).join('');
+}
+
+renderFixedFigures();
 renderBucketTable();
 writeForm();
 render();

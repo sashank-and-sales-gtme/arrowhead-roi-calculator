@@ -2,7 +2,7 @@ import { ARROWHEAD_BENCHMARKS, ARROWHEAD_RATE_RANGE } from './benchmarks.js';
 
 /**
  * Kaveri Finance is a fictional South Indian NBFC.
- * Every number below except the Arrowhead benchmarks and rate is illustrative,
+ * Every number below except Arrowhead's published lifts and price is illustrative,
  * chosen to demonstrate the mechanics. Replace them with a real lender's data.
  */
 export const DEMO_LENDER = {
@@ -36,7 +36,7 @@ export const DEMO_LENDER = {
   arrowhead: {
     collectionLift: ARROWHEAD_BENCHMARKS.collectionLift.value,
     connectionLift: ARROWHEAD_BENCHMARKS.connectionLift.value,
-    ratePerMinute: ARROWHEAD_RATE_RANGE.default,
+    ratePerMinute: ARROWHEAD_RATE_RANGE.applied,
     talkMinutes: 2.5,
     escalationRate: 0.10,
     transferDropoff: 0.25,

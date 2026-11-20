@@ -33,12 +33,12 @@ test('connection lift never changes collections', () => {
 
 test('AI-only cost is connected minutes x all-in rate plus retained seats', () => {
   const r = runModel(DEMO_LENDER);
-  // attempts 656,000 x 0.45 x 2.5 min x 3.75, plus all 60 seats kept
-  close(r.aiOnly.cost.arrowhead, 656000 * 0.45 * 2.5 * 3.75);
-  close(r.aiOnly.cost.total, 656000 * 0.45 * 2.5 * 3.75 + 60 * 32000);
+  // attempts 656,000 x 0.45 x 2.5 min x 4.00, plus all 60 seats kept
+  close(r.aiOnly.cost.arrowhead, 656000 * 0.45 * 2.5 * 4);
+  close(r.aiOnly.cost.total, 656000 * 0.45 * 2.5 * 4 + 60 * 32000);
   const inp = clone(DEMO_LENDER);
   inp.arrowhead.seatsReleasedShare = 1;
-  close(runModel(inp).aiOnly.cost.total, 656000 * 0.45 * 2.5 * 3.75);
+  close(runModel(inp).aiOnly.cost.total, 656000 * 0.45 * 2.5 * 4);
 });
 
 test('escalated calls collect at the human rate minus transfer drop-off', () => {
@@ -144,7 +144,7 @@ test('vendor slice compares the vendor with Arrowhead on the same accounts', () 
   close(v.beforeCollections, 0.4 * (540e6 * 0.68 + 280e6 * 0.35 + 144e6 * 0.15));
   close(v.afterCollections, 0.4 * (540e6 * 0.9 + 280e6 * 0.48 + 144e6 * 0.24));
   close(v.beforeCost, 656000 * 0.4 * 0.30 * 2.5 * 5);
-  close(v.afterCost, 656000 * 0.4 * 0.45 * 2.5 * 3.75);
+  close(v.afterCost, 656000 * 0.4 * 0.45 * 2.5 * 4);
   const avoided = 0.4 * ((486e6 - 367.2e6) * 0.05 + (134.4e6 - 98e6) * 0.15 + (34.56e6 - 21.6e6) * 0.35);
   close(v.pnlImpact, avoided - (v.afterCost - v.beforeCost));
 });

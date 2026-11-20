@@ -23,5 +23,9 @@ export const ARROWHEAD_BENCHMARKS = {
   },
 };
 
-/** Arrowhead pricing per connected minute, all-in including telephony. */
-export const ARROWHEAD_RATE_RANGE = { min: 3.5, max: 4.0, default: 3.75 };
+/**
+ * Arrowhead pricing per connected minute, all-in including telephony.
+ * The calculator applies the top of the range, so every saving it shows
+ * holds at the highest quoted price.
+ */
+export const ARROWHEAD_RATE_RANGE = { min: 3.5, max: 4.0, applied: 4.0 };

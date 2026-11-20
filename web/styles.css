@@ -291,3 +291,13 @@ button:hover { border-color: var(--ink); }
 /* Keep a figure and its sign together in running text */
 .pnl-headline strong, .hero-readout strong, .diagnostics dd { overflow-wrap: anywhere; }
 .pnl-headline strong, .hero-readout strong { white-space: nowrap; }
+
+/* Arrowhead's fixed figures: read-only facts above the editable assumptions */
+.fixed { margin: 0 0 20px; display: grid; gap: 10px; }
+.fixed div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; align-items: baseline;
+  padding: 12px 14px; border-radius: 12px; background: var(--blue-tint); }
+.fixed dt { font-size: 14px; color: var(--ink); }
+.fixed dt .tag { background: #fff; }
+.fixed dd { margin: 0; display: contents; }
+.fixed-value { grid-column: 2; grid-row: 1; font-size: 20px; font-weight: 500; color: var(--blue); white-space: nowrap; }
+.fixed dd .hint { grid-column: 1 / -1; }

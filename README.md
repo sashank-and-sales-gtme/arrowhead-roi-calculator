@@ -39,19 +39,20 @@ Without it, leads are appended to `leads.jsonl` in the project folder.
 ## Model rules
 
 1. **Only the collection-rate lift creates rupees.** Arrowhead's published result (20% above human agents, measured on AI-only motions) is applied to the lender's human collection rate in each bucket, capped at 100% of the overdue amount.
-2. **The connection lift explains the result and never adds to it.** Applying it on top of the collection lift would count the same effect twice.
-3. **Escalated calls are credited at the lender's own human rate**, minus borrowers lost in the transfer. Arrowhead's lift is not applied to work done by the lender's agents.
-4. **The transfer leg is billed by the lender's telco** at the lender's rate. Arrowhead's ₹3.50 to ₹4.00 per connected minute covers its own calls, telephony included.
-5. **Escalations queue on the seats the lender keeps.** Extra seats are costed only when the surge-day queue needs more than that.
-6. **P&L impact is credit cost avoided minus the change in collection cost.** A collected EMI is cash. The P&L gain is the share of it that would otherwise have become provisions or write-offs, set per bucket by the lender.
-7. **Arrowhead against an incumbent AI vendor is derived, never assumed.** Before is the vendor's own collection rate on its accounts. After is the lender's human collection rate in the same bucket × (1 + lift). A lender with no human agents left enters the human rate from before it moved to AI, and the page flags that the benchmark is historical. With no human rate at all, the comparison stays blank and the call to action is a pilot.
-8. **Hang-ups within 10 seconds are a diagnostic.** Value at risk = hang-ups × share the lender believes is recoverable × rupees collected per conversation that continues. It is never added to collections.
-9. **Break-even lift** is the collection-rate lift at which Arrowhead's P&L impact is zero, solved numerically with the 100% cap applied.
+2. **Arrowhead's figures are fixed.** The two published lifts and the price are shown on the page but can't be edited, so no visitor can change Arrowhead's claims. They live in `data/benchmarks.js`.
+3. **The connection lift explains the result and never adds to it.** Applying it on top of the collection lift would count the same effect twice.
+4. **Escalated calls are credited at the lender's own human rate**, minus borrowers lost in the transfer. Arrowhead's lift is not applied to work done by the lender's agents.
+5. **The transfer leg is billed by the lender's telco** at the lender's rate. Arrowhead's price covers its own calls, telephony included, and is applied at ₹4.00, the top of its ₹3.50 to ₹4.00 range.
+6. **Escalations queue on the seats the lender keeps.** Extra seats are costed only when the surge-day queue needs more than that.
+7. **P&L impact is credit cost avoided minus the change in collection cost.** A collected EMI is cash. The P&L gain is the share of it that would otherwise have become provisions or write-offs, set per bucket by the lender.
+8. **Arrowhead against an incumbent AI vendor is derived, never assumed.** Before is the vendor's own collection rate on its accounts. After is the lender's human collection rate in the same bucket × (1 + lift). A lender with no human agents left enters the human rate from before it moved to AI, and the page flags that the benchmark is historical. With no human rate at all, the comparison stays blank and the call to action is a pilot.
+9. **Hang-ups within 10 seconds are a diagnostic.** Value at risk = hang-ups × share the lender believes is recoverable × rupees collected per conversation that continues. It is never added to collections.
+10. **Break-even lift** is the collection-rate lift at which Arrowhead's P&L impact is zero, solved numerically with the 100% cap applied.
 
 ## Sources
 
 - Arrowhead collections results (20% higher collection rate, 50% higher connection rate, 4x ROI on write-offs): Arrowhead website, collections case panel.
-- Arrowhead pricing, ₹3.50 to ₹4.00 per connected minute, all-in.
+- Arrowhead pricing, ₹3.50 to ₹4.00 per connected minute, all-in; the calculator applies ₹4.00.
 - RBI recovery directions dated 6 August 2026, effective 1 January 2027: recovery calls between 8 am and 7 pm unless the borrower asks otherwise. Index to RBI Circulars, RBI/2026-27/229: https://rbi.org.in/Scripts/BS_CircularIndexDisplay.aspx?Id=13671
 
 ## Known limits
