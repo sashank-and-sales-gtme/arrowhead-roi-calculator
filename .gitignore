@@ -1,3 +1,4 @@
 node_modules/
 leads.jsonl
 .env
+.vercel
