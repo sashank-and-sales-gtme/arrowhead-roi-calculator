@@ -1,6 +1,8 @@
 import http from 'node:http';
-import { readFile, appendFile } from 'node:fs/promises';
+import { readFile, appendFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
+import { createHash } from 'node:crypto';
+import { gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)));
@@ -23,18 +25,53 @@ function send(res, status, body, type = 'text/plain; charset=utf-8') {
   res.end(body);
 }
 
+// Static files are gzipped once and kept in memory, keyed by path and modified time.
+const fileCache = new Map();
+
+async function loadStatic(filePath) {
+  const { mtimeMs } = await stat(filePath);
+  const cached = fileCache.get(filePath);
+  if (cached && cached.mtimeMs === mtimeMs) return cached;
+  const raw = await readFile(filePath);
+  const entry = {
+    mtimeMs,
+    raw,
+    gzip: gzipSync(raw, { level: 9 }),
+    etag: `"${createHash('sha1').update(raw).digest('base64url').slice(0, 20)}"`,
+  };
+  fileCache.set(filePath, entry);
+  return entry;
+}
+
 async function serveStatic(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const path = url.pathname === '/' ? '/web/index.html' : url.pathname;
   const filePath = normalize(join(ROOT, path));
   const allowed = PUBLIC_DIRS.some((dir) => filePath.startsWith(join(ROOT, dir) + '/'));
   if (!allowed) return send(res, 404, 'Not found');
+  let file;
   try {
-    const body = await readFile(filePath);
-    send(res, 200, body, TYPES[extname(filePath)] || 'application/octet-stream');
+    file = await loadStatic(filePath);
   } catch {
-    send(res, 404, 'Not found');
+    return send(res, 404, 'Not found');
   }
+  // Browsers revalidate on each visit and get a tiny 304 when nothing changed.
+  const headers = {
+    'Content-Type': TYPES[extname(filePath)] || 'application/octet-stream',
+    'Cache-Control': 'no-cache',
+    ETag: file.etag,
+    Vary: 'Accept-Encoding',
+  };
+  if (req.headers['if-none-match'] === file.etag) {
+    res.writeHead(304, headers);
+    return res.end();
+  }
+  const acceptsGzip = /\bgzip\b/.test(req.headers['accept-encoding'] || '');
+  const body = acceptsGzip ? file.gzip : file.raw;
+  if (acceptsGzip) headers['Content-Encoding'] = 'gzip';
+  headers['Content-Length'] = body.length;
+  res.writeHead(200, headers);
+  res.end(req.method === 'HEAD' ? undefined : body);
 }
 
 function readBody(req) {
