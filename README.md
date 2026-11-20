@@ -1,0 +1,63 @@
+# Collections P&L calculator for Arrowhead
+
+A lead magnet for lenders in South India. A collections head enters their overdue book and calling setup, and sees for the month:
+
+- **their AI vendor against Arrowhead** on the accounts the vendor works today: collections, cost and P&L, before and after
+- how much of their surge-day calling the RBI 8 am to 7 pm window can actually fit
+- their whole calling operation against Arrowhead running calls on its own, and Arrowhead with escalation to their agents
+
+Submitting the form sends the lender's numbers, current motion and buyer type to Clay, so the first sales email opens with their own figures.
+
+## Run it
+
+Requires Node 18 or later. No dependencies.
+
+```bash
+npm start            # http://localhost:4173
+npm test             # engine tests
+```
+
+To send leads to Clay, start the server with a Clay webhook URL:
+
+```bash
+CLAY_WEBHOOK_URL="https://api.clay.com/v3/sources/webhook/..." npm start
+```
+
+Without it, leads are appended to `leads.jsonl` in the project folder.
+
+## Layout
+
+| Path | What it holds |
+|---|---|
+| `engine/model.js` | The calculation engine, including the vendor-vs-Arrowhead view. Pure functions, no DOM, so it runs in the browser and in Node. |
+| `data/benchmarks.js` | Arrowhead's published collections results and price range. |
+| `data/demo-lender.js` | Kaveri Finance, a fictional lender used as the demo. Every value is illustrative. |
+| `web/` | The landing page. |
+| `server.js` | Static server plus the `/api/lead` endpoint. |
+| `test/` | Engine tests (`node --test`). |
+
+## Model rules
+
+1. **Only the collection-rate lift creates rupees.** Arrowhead's published result (20% above human agents, measured on AI-only motions) is applied to the lender's human collection rate in each bucket, capped at 100% of the overdue amount.
+2. **The connection lift explains the result and never adds to it.** Applying it on top of the collection lift would count the same effect twice.
+3. **Escalated calls are credited at the lender's own human rate**, minus borrowers lost in the transfer. Arrowhead's lift is not applied to work done by the lender's agents.
+4. **The transfer leg is billed by the lender's telco** at the lender's rate. Arrowhead's ₹3.50 to ₹4.00 per connected minute covers its own calls, telephony included.
+5. **Escalations queue on the seats the lender keeps.** Extra seats are costed only when the surge-day queue needs more than that.
+6. **P&L impact is credit cost avoided minus the change in collection cost.** A collected EMI is cash. The P&L gain is the share of it that would otherwise have become provisions or write-offs, set per bucket by the lender.
+7. **Arrowhead against an incumbent AI vendor is derived, never assumed.** Before is the vendor's own collection rate on its accounts. After is the lender's human collection rate in the same bucket × (1 + lift). A lender with no human agents left enters the human rate from before it moved to AI, and the page flags that the benchmark is historical. With no human rate at all, the comparison stays blank and the call to action is a pilot.
+8. **Hang-ups within 10 seconds are a diagnostic.** Value at risk = hang-ups × share the lender believes is recoverable × rupees collected per conversation that continues. It is never added to collections.
+9. **Break-even lift** is the collection-rate lift at which Arrowhead's P&L impact is zero, solved numerically with the 100% cap applied.
+
+## Sources
+
+- Arrowhead collections results (20% higher collection rate, 50% higher connection rate, 4x ROI on write-offs): Arrowhead website, collections case panel.
+- Arrowhead pricing, ₹3.50 to ₹4.00 per connected minute, all-in.
+- RBI recovery directions dated 6 August 2026, effective 1 January 2027: recovery calls between 8 am and 7 pm unless the borrower asks otherwise. Index to RBI Circulars, RBI/2026-27/229: https://rbi.org.in/Scripts/BS_CircularIndexDisplay.aspx?Id=13671
+
+## Known limits
+
+- A historical human rate comes from a different period, when the book and borrowers were different.
+- The 20% lift comes from one published deployment. Applying it to another lender's agents is an assumption the page states.
+- Collections are assumed to scale with conversations when splitting escalated and non-escalated calls.
+- The surge-day gap and hang-up leak use the lender's own inputs and are only as good as their dialer data.
+- Written-off accounts are out of scope.

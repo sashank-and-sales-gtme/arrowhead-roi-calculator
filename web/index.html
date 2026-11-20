@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>What your collection calls cost you inside the 8 am to 7 pm window</title>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@200,300,400,500,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/web/styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <p class="brand">Arrowhead collections calculator</p>
+    <p class="demo-note" id="demo-note">Showing a fictional lender, Kaveri Finance. Replace any value with your own.</p>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <p class="section-label">Collections, under the RBI calling window</p>
+      <h1 id="hero-title"><span>Every recovery call happens between 8&nbsp;am and 7&nbsp;pm.</span> <span class="tone-2">Does your busiest day fit inside it?</span></h1>
+      <div class="window" id="window" role="img" aria-label="Surge-day calling demand compared with the RBI calling window"></div>
+      <p class="hero-readout" id="hero-readout"></p>
+    </section>
+
+    <div class="workspace">
+      <form class="inputs" id="inputs" novalidate>
+        <div class="input-actions">
+          <button type="button" id="reset-demo">Load demo lender</button>
+          <button type="button" id="clear-all">Start from blank</button>
+        </div>
+
+        <fieldset>
+          <legend>Your overdue book this month</legend>
+          <div class="bucket-table" id="bucket-table"></div>
+          <label class="check"><input type="checkbox" name="book.humanBenchmarkIsHistorical"> The human collection rates above are from before we moved to AI</label>
+          <div class="grid">
+            <label>Working days in the month<input type="number" name="book.workingDays" min="1" max="31" step="1"></label>
+            <label>Surge days at month start<input type="number" name="book.surgeDays" min="1" step="1"></label>
+            <label>Share of the month's calls due on surge days (%)<input type="number" name="book.surgeShare" data-pct min="0" max="100" step="1"></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Who makes your collection calls today</legend>
+          <label class="wide">Share of accounts worked by a voice AI vendor (%)
+            <input type="number" name="today.incumbentShare" data-pct min="0" max="100" step="1">
+            <span class="hint">0% means only human agents. 100% means only AI.</span>
+          </label>
+        </fieldset>
+
+        <fieldset id="human-fields">
+          <legend>Your human agents</legend>
+          <p class="hint section-hint">If AI makes all your calls, set seats to 0 and keep the connect rate from when people made them.</p>
+          <div class="grid">
+            <label>Calling seats<input type="number" name="today.seats" min="0" step="1"></label>
+            <label>Utilisation inside the window (%)<input type="number" name="today.utilisation" data-pct min="0" max="100" step="1"></label>
+            <label>Dials per productive hour<input type="number" name="today.dialsPerProductiveHour" min="0" step="1"></label>
+            <label>Connect rate (%)<input type="number" name="today.humanConnectRate" data-pct min="0" max="100" step="0.1">
+              <span class="hint">No human agents left? Enter the rate from before you moved to AI.</span></label>
+            <label>Connected calls ended within 10 s (%)<input type="number" name="today.humanHangup10" data-pct min="0" max="100" step="0.1"></label>
+            <label>Average handle time (min)<input type="number" name="today.humanHandleMinutes" min="0" step="0.1"></label>
+            <label>Loaded cost per seat per month (₹)<input type="number" name="today.seatCostMonthly" min="0" step="500"></label>
+            <label>Your telco rate per minute (₹)<input type="number" name="today.telcoRatePerMinute" min="0" step="0.05"></label>
+          </div>
+        </fieldset>
+
+        <fieldset id="incumbent-fields">
+          <legend>Your current voice AI vendor</legend>
+          <div class="grid">
+            <label>Connect rate (%)<input type="number" name="today.incumbentConnectRate" data-pct min="0" max="100" step="0.1"></label>
+            <label>Connected calls ended within 10 s (%)<input type="number" name="today.incumbentHangup10" data-pct min="0" max="100" step="0.1"></label>
+            <label>Average talk time (min)<input type="number" name="today.incumbentTalkMinutes" min="0" step="0.1"></label>
+            <label>All-in cost per connected minute (₹)<input type="number" name="today.incumbentRatePerMinute" min="0" step="0.05">
+              <span class="hint">Include LLM and telephony if your vendor bills them separately.</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Arrowhead</legend>
+          <div class="grid">
+            <label><span>Collection rate vs human agents (+%)<span class="tag">Published result</span></span><input type="number" name="arrowhead.collectionLift" data-pct min="-100" step="1">
+              <span class="hint">Measured on AI-only motions.</span></label>
+            <label><span>Connection rate vs human agents (+%)<span class="tag">Published result</span></span><input type="number" name="arrowhead.connectionLift" data-pct min="0" step="1">
+              <span class="hint">Explains the outcome, never adds rupees.</span></label>
+            <label><span>Price per connected minute, all-in (₹)<span class="tag">Arrowhead pricing</span></span><input type="number" name="arrowhead.ratePerMinute" min="0" step="0.05">
+              <span class="hint">₹3.50 to ₹4.00 including telephony.</span></label>
+            <label>Average talk time (min)<input type="number" name="arrowhead.talkMinutes" min="0" step="0.1"></label>
+            <label>Calls escalated to your agents (%)<input type="number" name="arrowhead.escalationRate" data-pct min="0" max="100" step="1"></label>
+            <label>Borrowers lost during transfer (%)<input type="number" name="arrowhead.transferDropoff" data-pct min="0" max="100" step="1"></label>
+            <label>Calling seats you release (%)<input type="number" name="arrowhead.seatsReleasedShare" data-pct min="0" max="100" step="5">
+              <span class="hint">Escalations queue on the seats you keep.</span></label>
+            <label>Share of 10-second hang-ups you could win back (%)<input type="number" name="arrowhead.recoverableShare" data-pct min="0" max="100" step="5"></label>
+          </div>
+        </fieldset>
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+      </form>
+
+      <section class="results" aria-labelledby="results-title">
+        <div class="panel">
+        <h2 id="results-title">Your AI vendor against Arrowhead</h2>
+        <p class="lede" id="vendor-lede">On the accounts your vendor works today, this month.</p>
+        <table class="pnl vendor" id="vendor"><thead>
+          <tr><th scope="col"><span class="visually-hidden">Line</span></th><th scope="col">Before: your vendor</th><th scope="col">After: Arrowhead</th><th scope="col">Change</th></tr>
+        </thead><tbody></tbody></table>
+        <p class="pnl-headline" id="vendor-headline"></p>
+        <p class="caveat" id="historical-caveat" hidden>Arrowhead’s figures here build on the human collection rates you had before moving to AI. Your book and borrowers may have changed since then.</p>
+        </div>
+
+        <div class="panel">
+        <h3>Your whole calling operation, three ways</h3>
+        <table class="pnl" id="pnl">
+          <thead>
+            <tr><th scope="col"><span class="visually-hidden">Line</span></th><th scope="col">Today</th><th scope="col">Arrowhead, AI-only</th><th scope="col">Arrowhead with escalation</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <p class="pnl-headline" id="pnl-headline"></p>
+
+        </div>
+
+        <div class="panel">
+        <h3>What sits behind the number</h3>
+        <dl class="diagnostics" id="diagnostics"></dl>
+        </div>
+
+        <div class="panel">
+        <h3>Arrowhead against your vendor, bucket by bucket</h3>
+        <table class="ratio" id="ratio"><tbody></tbody></table>
+        </div>
+      </section>
+    </div>
+
+    <section class="capture" aria-labelledby="capture-title">
+      <h2 id="capture-title">Get this breakdown with your numbers. <span class="tone-2">We’ll walk your collections team through it.</span></h2>
+      <form id="lead-form" class="lead-form">
+        <label>Work email<input type="email" name="email" required autocomplete="email"></label>
+        <label>Company<input type="text" name="company" required autocomplete="organization"></label>
+        <fieldset class="buyer">
+          <legend>Which is closest to where you are?</legend>
+          <label><input type="radio" name="buyerType" value="content-with-vendor" required> We use a voice AI vendor and it works for us</label>
+          <label><input type="radio" name="buyerType" value="burnt-by-vendor"> We tried voice AI and the results disappointed us</label>
+          <label><input type="radio" name="buyerType" value="not-convinced"> We haven't used voice AI for collections</label>
+        </fieldset>
+        <button type="submit">Send me the breakdown</button>
+        <p class="lead-status" id="lead-status" role="status"></p>
+      </form>
+    </section>
+
+    <section class="method" aria-labelledby="method-title">
+      <h2 id="method-title">How this is calculated</h2>
+      <ul>
+        <li>Only Arrowhead's published collection-rate lift changes rupees collected. It applies to your human collection rate in each bucket, capped at 100% of what is overdue.</li>
+        <li>Escalated calls collect at your own human rate, minus borrowers lost in the transfer. The transfer leg is billed by your telco at your rate.</li>
+        <li>P&amp;L impact is credit cost avoided minus the change in collection cost. A collected EMI is cash; the P&amp;L gain is the part of it that would otherwise have become provisions or write-offs.</li>
+        <li>The connection lift, the surge-day gap and 10-second hang-ups explain the result. They are never added to it.</li>
+        <li>Arrowhead against your current vendor is derived through your human collection rate in the same bucket: your vendor's rate is the before, and your human rate × Arrowhead's published lift is the after. If you no longer use human agents, the rate from before you moved to AI stands in, and the page says so.</li>
+        <li>The vendor comparison covers only the accounts your vendor works. Your human agents and seats are left as they are.</li>
+        <li>RBI directions effective 1 January 2027 limit recovery calls to 8 am to 7 pm unless the borrower asks for another time.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Concept model by Sashank Koundinya, built for a conversation with Arrowhead. Arrowhead figures come from its published collections results; every other default is a fictional example.</p>
+  </footer>
+
+  <script type="module" src="/web/app.js"></script>
+</body>
+</html>
