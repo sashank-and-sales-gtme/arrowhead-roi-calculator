@@ -34,6 +34,19 @@ The repo deploys as a static site plus one function, with no build step.
 
 `vercel.json` serves the page at `/`, and `api/lead.js` handles the lead form. `server.js` is only for running locally, and `.vercelignore` keeps it and the tests out of the deployment.
 
+## Security
+
+The lead endpoint is public, so `lib/lead.js` treats every request as untrusted:
+
+- Only same-origin `application/json` posts are accepted, so other sites can't submit leads from a visitor's browser.
+- Bodies are capped at 16 KB and every string is length-capped before validation.
+- The record sent to Clay is rebuilt from known fields only. Extra fields are dropped, and text starting with `=`, `+`, `-` or `@` is prefixed with `'` so spreadsheets and Clay tables don't run it as a formula.
+- A hidden `website` field catches simple bots; those submissions are dropped without an error.
+- Webhook failures return a generic message; details go to the server log.
+- Every response carries a Content-Security-Policy, `X-Frame-Options: DENY`, `nosniff`, a referrer policy and a permissions policy (`vercel.json` on Vercel, `server.js` locally).
+- On Vercel, a firewall rule limits `POST /api/lead` to 5 requests per IP per minute. It lives in the project's Firewall settings, not in this repo.
+- Locally the server listens on `127.0.0.1` only. Set `HOST=0.0.0.0` to share it on your network.
+
 ## Layout
 
 | Path | What it holds |

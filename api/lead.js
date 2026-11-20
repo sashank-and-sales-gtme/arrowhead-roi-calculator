@@ -1,35 +1,33 @@
-import { validateLead, forwardToWebhook, MAX_BODY_BYTES } from '../lib/lead.js';
+import { parseLeadRequest, forwardToWebhook, MAX_BODY_BYTES } from '../lib/lead.js';
 
 /**
  * Vercel function for POST /api/lead.
  * Forwards to CLAY_WEBHOOK_URL when it is set in the Vercel project's environment
  * variables; otherwise the lead is written to the function logs.
  */
+const text = (body, status, extra = {}) =>
+  new Response(body, { status, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', ...extra } });
+const json = (body) => Response.json(body, { headers: { 'Cache-Control': 'no-store' } });
+
 export default {
   async fetch(request) {
-    if (request.method !== 'POST') {
-      return new Response('Method not allowed', { status: 405, headers: { Allow: 'POST' } });
-    }
-    const text = await request.text();
-    if (text.length > MAX_BODY_BYTES) return new Response('Payload too large', { status: 413 });
+    if (request.method !== 'POST') return text('Method not allowed', 405, { Allow: 'POST' });
 
-    let lead;
-    try {
-      lead = JSON.parse(text);
-    } catch {
-      return new Response('Body must be valid JSON', { status: 400 });
-    }
-    const problem = validateLead(lead);
-    if (problem) return new Response(problem, { status: 422 });
+    const declared = Number(request.headers.get('content-length'));
+    if (declared > MAX_BODY_BYTES) return text('Payload too large', 413);
 
-    const record = { ...lead, receivedAt: new Date().toISOString() };
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || new URL(request.url).host;
+    const result = parseLeadRequest({ headers: request.headers, bodyText: await request.text(), host });
+    if (result.status) return text(result.message, result.status);
+    if (result.drop) return json({ delivered: 'log' });
+
     const webhook = process.env.CLAY_WEBHOOK_URL;
     if (webhook) {
-      const result = await forwardToWebhook(webhook, record);
-      if (!result.ok) return new Response(result.message, { status: result.status });
-      return Response.json({ delivered: 'webhook' });
+      const sent = await forwardToWebhook(webhook, result.record);
+      if (!sent.ok) return text(sent.message, sent.status);
+      return json({ delivered: 'webhook' });
     }
-    console.log(`lead ${JSON.stringify(record)}`);
-    return Response.json({ delivered: 'log' });
+    console.log(`lead ${JSON.stringify(result.record)}`);
+    return json({ delivered: 'log' });
   },
 };

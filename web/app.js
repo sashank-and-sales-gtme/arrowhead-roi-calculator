@@ -358,6 +358,7 @@ document.getElementById('lead-form').addEventListener('submit', async (ev) => {
   }
   const payload = {
     contact: { email: data.email, company: data.company },
+    website: data.website || '',
     buyerType: data.buyerType,
     currentMotion: lastResult.motionLabel,
     headline: {

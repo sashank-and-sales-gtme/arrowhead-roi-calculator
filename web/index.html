@@ -133,8 +133,9 @@
     <section class="capture" aria-labelledby="capture-title">
       <h2 id="capture-title">Get this breakdown with your numbers. <span class="tone-2">We’ll walk your collections team through it.</span></h2>
       <form id="lead-form" class="lead-form">
-        <label>Work email<input type="email" name="email" required autocomplete="email"></label>
-        <label>Company<input type="text" name="company" required autocomplete="organization"></label>
+        <label>Work email<input type="email" name="email" required autocomplete="email" maxlength="254"></label>
+        <label>Company<input type="text" name="company" required autocomplete="organization" maxlength="200"></label>
+        <div class="visually-hidden" aria-hidden="true"><label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
         <fieldset class="buyer">
           <legend>Which is closest to where you are?</legend>
           <label><input type="radio" name="buyerType" value="content-with-vendor" required> We use a voice AI vendor and it works for us</label>
