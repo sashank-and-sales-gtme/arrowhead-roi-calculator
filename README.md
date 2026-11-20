@@ -25,9 +25,13 @@ CLAY_WEBHOOK_URL="https://api.clay.com/v3/sources/webhook/..." npm start
 
 Without it, leads are appended to `leads.jsonl` in the project folder.
 
+### Fonts
+
+The page uses General Sans, served from this site rather than a font CDN, so visitors' browsers only ever contact this domain. Its license (the ITF Free Font License) allows self-hosting but not redistributing the files through a public repository, so they are not committed. `scripts/fetch-fonts.mjs` downloads the official files from Fontshare into `web/fonts/` (git-ignored) and checks each against a pinned SHA-256. `npm start` runs it first and falls back to system fonts if you're offline; `npm run fonts` runs it on its own. If Fontshare ships new versions, the hash check fails and prints the new hashes to review.
+
 ## Deploy on Vercel
 
-The repo deploys as a static site plus one function, with no build step.
+The repo deploys as a static site plus one function. The only build step fetches the fonts (`node scripts/fetch-fonts.mjs`); if that fails, the build fails and the previous deployment stays live.
 
 1. In Vercel, import this GitHub repository, or connect it to an existing project under **Settings → Git**. Every push to `main` then deploys automatically.
 2. Optional: add `CLAY_WEBHOOK_URL` under **Settings → Environment Variables** to send leads to Clay. Without it, leads are written to the function logs.
@@ -43,7 +47,7 @@ The lead endpoint is public, so `lib/lead.js` treats every request as untrusted:
 - The record sent to Clay is rebuilt from known fields only. Extra fields are dropped, and text starting with `=`, `+`, `-` or `@` is prefixed with `'` so spreadsheets and Clay tables don't run it as a formula.
 - A hidden `website` field catches simple bots; those submissions are dropped without an error.
 - Webhook failures return a generic message; details go to the server log.
-- Every response carries a Content-Security-Policy, `X-Frame-Options: DENY`, `nosniff`, a referrer policy and a permissions policy (`vercel.json` on Vercel, `server.js` locally).
+- Every response carries a Content-Security-Policy that allows scripts, styles and fonts from this site only, `X-Frame-Options: DENY`, `nosniff`, a referrer policy and a permissions policy (`vercel.json` on Vercel, `server.js` locally).
 - On Vercel, a firewall rule limits `POST /api/lead` to 5 requests per IP per minute. It lives in the project's Firewall settings, not in this repo.
 - Locally the server listens on `127.0.0.1` only. Set `HOST=0.0.0.0` to share it on your network.
 

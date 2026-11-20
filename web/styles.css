@@ -1,3 +1,8 @@
+/* General Sans, served from this site (see scripts/fetch-fonts.mjs). */
+@font-face { font-family: 'General Sans'; src: url('/web/fonts/GeneralSans-Light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'General Sans'; src: url('/web/fonts/GeneralSans-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'General Sans'; src: url('/web/fonts/GeneralSans-Medium.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
+
 /* Tokens taken from arrowhead.ai */
 :root {
   --paper: #EEECE8;

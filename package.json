@@ -4,7 +4,8 @@
   "description": "Collections P&L calculator: human, incumbent AI and Arrowhead motions under the RBI 8 am to 7 pm calling window.",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "node scripts/fetch-fonts.mjs --optional && node server.js",
+    "fonts": "node scripts/fetch-fonts.mjs",
     "test": "node --test test/*.test.js"
   },
   "engines": {

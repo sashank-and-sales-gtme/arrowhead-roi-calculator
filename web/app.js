@@ -404,14 +404,3 @@ renderFixedFigures();
 renderBucketTable();
 writeForm();
 render();
-
-/* General Sans is requested only after the page has finished loading, so a slow
-   font host can neither delay the first paint nor keep the browser's loading bar running. */
-function loadBrandFont() {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = 'https://api.fontshare.com/v2/css?f[]=general-sans@300,400,500&display=swap';
-  document.head.appendChild(link);
-}
-if (document.readyState === 'complete') loadBrandFont();
-else window.addEventListener('load', loadBrandFont, { once: true });
