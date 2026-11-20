@@ -25,6 +25,15 @@ CLAY_WEBHOOK_URL="https://api.clay.com/v3/sources/webhook/..." npm start
 
 Without it, leads are appended to `leads.jsonl` in the project folder.
 
+## Deploy on Vercel
+
+The repo deploys as a static site plus one function, with no build step.
+
+1. In Vercel, import this GitHub repository, or connect it to an existing project under **Settings → Git**. Every push to `main` then deploys automatically.
+2. Optional: add `CLAY_WEBHOOK_URL` under **Settings → Environment Variables** to send leads to Clay. Without it, leads are written to the function logs.
+
+`vercel.json` serves the page at `/`, and `api/lead.js` handles the lead form. `server.js` is only for running locally, and `.vercelignore` keeps it and the tests out of the deployment.
+
 ## Layout
 
 | Path | What it holds |
@@ -33,7 +42,10 @@ Without it, leads are appended to `leads.jsonl` in the project folder.
 | `data/benchmarks.js` | Arrowhead's published collections results and price range. |
 | `data/demo-lender.js` | Kaveri Finance, a fictional lender used as the demo. Every value is illustrative. |
 | `web/` | The landing page. |
-| `server.js` | Static server plus the `/api/lead` endpoint. |
+| `server.js` | Local static server plus the `/api/lead` endpoint. |
+| `api/lead.js` | The `/api/lead` endpoint as a Vercel function. |
+| `lib/lead.js` | Lead validation and webhook delivery shared by both. |
+| `vercel.json` | Vercel routing and caching. |
 | `test/` | Engine tests (`node --test`). |
 
 ## Model rules

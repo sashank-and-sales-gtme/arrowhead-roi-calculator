@@ -3,13 +3,13 @@ import { readFile, appendFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
+import { validateLead, forwardToWebhook, MAX_BODY_BYTES } from './lib/lead.js';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const PORT = Number(process.env.PORT) || 4173;
 const WEBHOOK_URL = process.env.CLAY_WEBHOOK_URL || '';
 const LEADS_FILE = join(ROOT, 'leads.jsonl');
-const MAX_BODY_BYTES = 64 * 1024;
 
 const PUBLIC_DIRS = ['web', 'engine', 'data'];
 const TYPES = {
@@ -92,17 +92,6 @@ function readBody(req) {
   });
 }
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const BUYER_TYPES = new Set(['content-with-vendor', 'burnt-by-vendor', 'not-convinced']);
-
-function validateLead(lead) {
-  if (!lead || typeof lead !== 'object') return 'Body must be a JSON object';
-  if (!EMAIL.test(lead?.contact?.email || '')) return 'A valid work email is required';
-  if (!(lead?.contact?.company || '').trim()) return 'Company is required';
-  if (!BUYER_TYPES.has(lead.buyerType)) return 'Unknown buyer type';
-  return null;
-}
-
 async function handleLead(req, res) {
   let lead;
   try {
@@ -116,17 +105,9 @@ async function handleLead(req, res) {
   const record = { ...lead, receivedAt: new Date().toISOString() };
 
   if (WEBHOOK_URL) {
-    try {
-      const upstream = await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(record),
-      });
-      if (!upstream.ok) return send(res, 502, `Webhook returned ${upstream.status}`);
-      return send(res, 200, JSON.stringify({ delivered: 'webhook' }), TYPES['.json']);
-    } catch (err) {
-      return send(res, 502, `Webhook unreachable: ${err.message}`);
-    }
+    const result = await forwardToWebhook(WEBHOOK_URL, record);
+    if (!result.ok) return send(res, result.status, result.message);
+    return send(res, 200, JSON.stringify({ delivered: 'webhook' }), TYPES['.json']);
   }
 
   await appendFile(LEADS_FILE, JSON.stringify(record) + '\n');
